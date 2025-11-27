@@ -90,7 +90,7 @@ router.get('/carrinhos/cliente/:clienteId', validateId, CarrinhoController.getBy
  *       500:
  *         description: Erro interno do servidor
  */
-router.get('/carrinhos/:id/total', validateId, CarrinhoController.calcularTotal);
+router.get('/carrinhos/:id/total', validateId, CarrinhoController.getTotal);
 
 /**
  * @swagger

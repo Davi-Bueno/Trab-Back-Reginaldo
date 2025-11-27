@@ -7,6 +7,44 @@ const EletrodomesticoModel = require('../models/eletrodomesticoModel');
  */
 const CarrinhoEletroController = {
   /**
+   * GET /carrinho-eletro - Lista todos os itens
+   */
+  async getAll(req, res) {
+    try {
+      const itens = await CarrinhoEletroModel.findAll();
+      res.status(200).json(itens);
+    } catch (error) {
+      console.error('Erro ao buscar itens:', error);
+      res.status(500).json({ 
+        error: 'Erro ao buscar itens',
+        message: error.message 
+      });
+    }
+  },
+
+  /**
+   * GET /carrinho-eletro/:carrinhoId/:eletrodomesticoId - Busca item específico
+   */
+  async getById(req, res) {
+    try {
+      const { carrinhoId, eletrodomesticoId } = req.params;
+      const item = await CarrinhoEletroModel.findOne(carrinhoId, eletrodomesticoId);
+      
+      if (!item) {
+        return res.status(404).json({ error: 'Item não encontrado no carrinho' });
+      }
+      
+      res.status(200).json(item);
+    } catch (error) {
+      console.error('Erro ao buscar item:', error);
+      res.status(500).json({ 
+        error: 'Erro ao buscar item',
+        message: error.message 
+      });
+    }
+  },
+
+  /**
    * GET /carrinhos/:carrinhoId/itens - Lista itens de um carrinho
    */
   async getByCarrinho(req, res) {
@@ -31,17 +69,16 @@ const CarrinhoEletroController = {
   },
 
   /**
-   * POST /carrinhos/:carrinhoId/itens - Adiciona item ao carrinho
+   * POST /carrinho-eletro - Adiciona item ao carrinho
    */
-  async addItem(req, res) {
+  async create(req, res) {
     try {
-      const { carrinhoId } = req.params;
-      const { eletrodomesticoId, quantidade } = req.body;
+      const { carrinhoId, eletrodomesticoId, quantidade } = req.body;
 
-      if (!eletrodomesticoId || !quantidade) {
+      if (!carrinhoId || !eletrodomesticoId || !quantidade) {
         return res.status(400).json({ 
           error: 'Dados incompletos',
-          required: ['eletrodomesticoId', 'quantidade']
+          required: ['carrinhoId', 'eletrodomesticoId', 'quantidade']
         });
       }
 
@@ -83,9 +120,9 @@ const CarrinhoEletroController = {
   },
 
   /**
-   * PUT /carrinhos/:carrinhoId/itens/:eletrodomesticoId - Atualiza quantidade do item
+   * PUT /carrinho-eletro/:carrinhoId/:eletrodomesticoId - Atualiza quantidade do item
    */
-  async updateQuantity(req, res) {
+  async update(req, res) {
     try {
       const { carrinhoId, eletrodomesticoId } = req.params;
       const { quantidade } = req.body;
@@ -120,9 +157,9 @@ const CarrinhoEletroController = {
   },
 
   /**
-   * DELETE /carrinhos/:carrinhoId/itens/:eletrodomesticoId - Remove item do carrinho
+   * DELETE /carrinho-eletro/:carrinhoId/:eletrodomesticoId - Remove item do carrinho
    */
-  async removeItem(req, res) {
+  async delete(req, res) {
     try {
       const { carrinhoId, eletrodomesticoId } = req.params;
 
@@ -138,30 +175,6 @@ const CarrinhoEletroController = {
       console.error('Erro ao remover item:', error);
       res.status(500).json({ 
         error: 'Erro ao remover item',
-        message: error.message 
-      });
-    }
-  },
-
-  /**
-   * DELETE /carrinhos/:carrinhoId/itens - Remove todos os itens do carrinho
-   */
-  async clearCart(req, res) {
-    try {
-      const { carrinhoId } = req.params;
-
-      // Verifica se carrinho existe
-      const carrinho = await CarrinhoModel.findById(carrinhoId);
-      if (!carrinho) {
-        return res.status(404).json({ error: 'Carrinho não encontrado' });
-      }
-
-      await CarrinhoEletroModel.deleteAllByCarrinho(carrinhoId);
-      res.status(200).json({ message: 'Carrinho esvaziado com sucesso' });
-    } catch (error) {
-      console.error('Erro ao esvaziar carrinho:', error);
-      res.status(500).json({ 
-        error: 'Erro ao esvaziar carrinho',
         message: error.message 
       });
     }
